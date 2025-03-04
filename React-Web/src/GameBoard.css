@@ -95,7 +95,8 @@
 .tile-1024 { background: #edc53f; color: #f9f6f2; font-size: 30px; }
 .tile-2048 { background: #edc22e; color: #f9f6f2; font-size: 30px; }
 
-.game-over {
+.game-over::after {
+  content: "Game Over";
   position: absolute;
   top: 0;
   left: 0;

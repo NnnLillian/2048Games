@@ -6,15 +6,11 @@ const GRID_SIZE = 4;
 const INITIAL_TILES = 2;
 
 export default function Game2048() {
-	// const [board, setBoard] = useState(() =>
-	//   Array(GRID_SIZE).fill().map(() => Array(GRID_SIZE).fill(2))
-	// );
-	const [board, setBoard] = useState([
-		[2, 2, 2, 2],
-		[2, 2, 2, 2],
-		[4, 2, 2, 2],
-		[8, 2, 2, 2],
-	]);
+	const [board, setBoard] = useState(() =>
+		Array(GRID_SIZE)
+			.fill()
+			.map(() => Array(GRID_SIZE).fill(0))
+	);
 	const [score, setScore] = useState(0);
 	const [gameOver, setGameOver] = useState(false);
 
@@ -26,7 +22,7 @@ export default function Game2048() {
 		return () => window.removeEventListener("keydown", handleKeyPress);
 	}, []);
 
-	// 生成初始棋盘（包含两个2）
+	// 生成初始棋盘（包含两个2/4）
 	const generateInitialBoard = () => {
 		const newBoard = board.map((row) => [...row]);
 		for (let i = 0; i < INITIAL_TILES; i++) {
@@ -47,87 +43,90 @@ export default function Game2048() {
 	};
 
 	// 添加新方块（函数式更新）
-	const addNewTile = (currentBoard) => {
+	const addNewTile = useCallback((currentBoard) => {
 		const emptyCells = getEmptyCells(currentBoard);
 		if (emptyCells.length === 0) return;
 
 		const [x, y] = emptyCells[Math.floor(Math.random() * emptyCells.length)];
 		currentBoard[x][y] = Math.random() < 0.9 ? 2 : 4;
-	};
+	}, []);
 
 	// 核心移动逻辑
-	const moveTiles = (direction) => {
-		setBoard((prevBoard) => {
-			const newBoard = prevBoard.map((row) => [...row]);
-			let moved = false;
-			let mergedScore = 0;
+	const moveTiles = useCallback(
+		(direction) => {
+			setBoard((prevBoard) => {
+				const newBoard = prevBoard.map((row) => [...row]);
+				let moved = false;
+				let mergedScore = 0;
 
-			const processRow = (row) => {
-				let filtered = row.filter((cell) => cell !== 0);
+				const processRow = (row) => {
+					let filtered = row.filter((cell) => cell !== 0);
 
-				// 合并相同数字
-				for (let i = 0; i < filtered.length - 1; i++) {
-					if (filtered[i] === filtered[i + 1]) {
-						filtered[i] *= 2;
-						mergedScore += filtered[i];
-						filtered.splice(i + 1, 1);
-						i--;
-						moved = true;
+					// 合并相同数字
+					for (let i = 0; i < filtered.length - 1; i++) {
+						if (filtered[i] === filtered[i + 1]) {
+							filtered[i] *= 2;
+							mergedScore += filtered[i];
+							filtered.splice(i + 1, 1);
+							i--;
+							moved = true;
+						}
 					}
+
+					// 填充空位
+					while (filtered.length < GRID_SIZE) filtered.push(0);
+					return filtered;
+				};
+
+				switch (direction) {
+					case "ArrowUp":
+						for (let col = 0; col < GRID_SIZE; col++) {
+							const column = newBoard.map((row) => row[col]);
+							const processed = processRow(column);
+							processed.forEach((val, row) => {
+								if (newBoard[row][col] !== val) moved = true;
+								newBoard[row][col] = val;
+							});
+						}
+						break;
+					case "ArrowDown":
+						for (let col = 0; col < GRID_SIZE; col++) {
+							const column = newBoard.map((row) => row[col]).reverse();
+							const processed = processRow(column).reverse();
+							processed.forEach((val, row) => {
+								if (newBoard[row][col] !== val) moved = true;
+								newBoard[row][col] = val;
+							});
+						}
+						break;
+					case "ArrowLeft":
+						newBoard.forEach((row, i) => {
+							const processed = processRow([...row]);
+							if (row.join(",") !== processed.join(",")) moved = true;
+							newBoard[i] = processed;
+						});
+						break;
+					case "ArrowRight":
+						newBoard.forEach((row, i) => {
+							const reversed = [...row].reverse();
+							const processed = processRow(reversed).reverse();
+							if (row.join(",") !== processed.join(",")) moved = true;
+							newBoard[i] = processed;
+						});
+						break;
 				}
 
-				// 填充空位
-				while (filtered.length < GRID_SIZE) filtered.push(0);
-				return filtered;
-			};
-
-			switch (direction) {
-				case "ArrowUp":
-					for (let col = 0; col < GRID_SIZE; col++) {
-						const column = newBoard.map((row) => row[col]);
-						const processed = processRow(column);
-						processed.forEach((val, row) => {
-							if (newBoard[row][col] !== val) moved = true;
-							newBoard[row][col] = val;
-						});
-					}
-					break;
-				case "ArrowDown":
-					for (let col = 0; col < GRID_SIZE; col++) {
-						const column = newBoard.map((row) => row[col]).reverse();
-						const processed = processRow(column).reverse();
-						processed.forEach((val, row) => {
-							if (newBoard[row][col] !== val) moved = true;
-							newBoard[row][col] = val;
-						});
-					}
-					break;
-				case "ArrowLeft":
-					newBoard.forEach((row, i) => {
-						const processed = processRow([...row]);
-						if (row.join(",") !== processed.join(",")) moved = true;
-						newBoard[i] = processed;
-					});
-					break;
-				case "ArrowRight":
-					newBoard.forEach((row, i) => {
-						const reversed = [...row].reverse();
-						const processed = processRow(reversed).reverse();
-						if (row.join(",") !== processed.join(",")) moved = true;
-						newBoard[i] = processed;
-					});
-					break;
-			}
-
-			if (moved) {
-				addNewTile(newBoard);
-				setScore((s) => s + mergedScore);
-				checkGameOver(newBoard);
-				return newBoard.map((row) => [...row]);
-			}
-			return prevBoard;
-		});
-	};
+				if (moved) {
+					addNewTile(newBoard);
+					setScore((s) => s + mergedScore);
+					checkGameOver(newBoard);
+					return newBoard.map((row) => [...row]);
+				}
+				return prevBoard;
+			});
+		},
+		[addNewTile]
+	);
 
 	// 游戏结束检测
 	const checkGameOver = (currentBoard) => {
@@ -166,7 +165,7 @@ export default function Game2048() {
 				</button>
 			</div>
 
-			<div className="grid-container">
+			<div className={`grid-container ${gameOver ? "game-over" : ""}`}>
 				{board.map((row, i) => (
 					<div key={i} className="grid-row">
 						{row.map((cell, j) => (
@@ -176,7 +175,6 @@ export default function Game2048() {
 						))}
 					</div>
 				))}
-				{gameOver && <div className="game-over">Game Over!</div>}
 			</div>
 		</div>
 	);
