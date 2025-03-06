@@ -164,40 +164,63 @@ export default function Game2048() {
 	};
 
 	return (
-		<div className="game-container min-h-screen bg-[#faf8f0] p-5 flex flex-col items-center">
+		<div className="game-container min-h-screen bg-[#faf8f0] p-4 flex flex-col items-center min-w-screen">
 			{/* 头部区域 */}
-			<div className="header flex justify-between w-full max-w-[600px] mb-5 items-center">
-				{/* 标题 */}
-				<div className="title text-[#726554] text-5xl font-bold font-[Frizon]">2048</div>
+			<header className="header w-full max-w-[500px] mb-4 md:mb-6">
+				{/* PC布局（md以上） */}
+				<div className="hidden md:flex justify-between items-center">
+					{/* 标题 */}
+					<h1 className="text-[#726554] text-4xl md:text-5xl font-bold font-[Frizon]">2048</h1>
+					{/* 分数区域 */}
+					<div className="middle flex items-center gap-4 text-[#75695a]">
+						{/* 当前分数 */}
+						<div className="score middle-box inline-block bg-[#eae7d9] border-2 border-[#eae7d9] rounded-xl min-w-[75px] px-3 py-1 text-center">
+							<div className="score-title leading-none text-s font-medium">Score</div>
+							<div className="score-number leading-none  text-xl font-black mt-1">{score}</div>
+						</div>
 
-				{/* 分数区域 */}
-				<div className="middle flex gap-4">
-					{/* 当前分数 */}
-					<div className="score middle-box bg-[#eae7d9] border-2 border-[#eae7d9] rounded-xl min-w-[75px] px-3 py-1 text-center">
-						<div className="score-title text-[#75695a] text-xs font-medium">Score</div>
-						<div className="score-number text-[#75695a] text-xl font-black">{score}</div>
+						{/* 最佳分数 */}
+						<div className="best middle-box inline-block border-2 border-[#eae7d9] rounded-xl min-w-[75px] px-3 py-1 text-center">
+							<div className="score-title leading-none  text-s font-medium">Best</div>
+							<div className="score-number leading-none text-xl font-black mt-1">{score > bestScore ? score : bestScore}</div>
+						</div>
 					</div>
-
-					{/* 最佳分数 */}
-					<div className="best middle-box border-2 border-[#eae7d9] rounded-xl min-w-[75px] px-3 py-1 text-center">
-						<div className="score-title text-[#75695a] text-xs font-medium">Best</div>
-						<div className="score-number text-[#75695a] text-xl font-black">{score > bestScore ? score : bestScore}</div>
-					</div>
+					{/* 重启按钮 */}
+					<button
+						onClick={restart}
+						className="restart-btn white bg-[#998b7a] flex items-center whitespace-nowrap rounded-lg text-base disabled:opacity-50 text-white px-4 h-10"
+					>
+						New Game
+					</button>
 				</div>
 
-				{/* 重启按钮 */}
-				<button
-					onClick={restart}
-					className="restart-btn bg-[#8f7a66] text-white rounded-xl px-4 py-2 text-lg font-medium
-                hover:bg-[#7c6b5a] transition-colors duration-200"
-				>
-					New Game
-				</button>
-			</div>
+				{/* 移动端布局（md以下） */}
+				<div className="md:hidden flex flex-col items-center gap-3">
+					<div className="w-full flex justify-between">
+						<h1 className="text-[#726554] text-4xl font-bold font-[Frizon]">2048</h1>
+						<button className="restart-btn text-[#726554] w-6">
+							<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 -960 960 960">
+								<path d="M480-160q-134 0-227-93t-93-227 93-227 227-93q69 0 132 28.5T720-690v-70q0-17 11.5-28.5T760-800t28.5 11.5T800-760v200q0 17-11.5 28.5T760-520H560q-17 0-28.5-11.5T520-560t11.5-28.5T560-600h128q-32-56-87.5-88T480-720q-100 0-170 70t-70 170 70 170 170 70q68 0 124.5-34.5T692-367q8-14 22.5-19.5t29.5-.5q16 5 23 21t-1 30q-41 80-117 128t-169 48"></path>
+							</svg>
+						</button>
+					</div>
+					{/* 分数水平排列容器 */}
+					<div className="w-full flex items-center gap-2">
+						<div className="score middle-box w-full flex justify-between py-2 px-4 rounded-xl text-[#75695a] bg-[#eae7d9] border-2 border-[#eae7d9]">
+							<div className="font-[Boisu]">SCORE</div>
+							<div className="font-bold">{score}</div>
+						</div>
+						<div className="best middle-box w-full flex justify-between py-2 px-4 rounded-xl text-[#75695a] border-2 border-[#eae7d9]">
+							<div className="font-[Boisu]">BEST</div>
+							<div className="font-bold">{bestScore}</div>
+						</div>
+					</div>
+				</div>
+			</header>
 
 			{/* 游戏网格区域 */}
 			<div
-				className={`grid-container bg-[#99897b] rounded-xl p-2.5 relative w-full max-w-[600px] 
+				className={`grid-container bg-[#99897b] rounded-xl p-2.5 relative  max-w-[600px] font-[Frizon]
                   ${gameOver ? "game-over" : ""}`}
 			>
 				{board.map((row, i) => (
