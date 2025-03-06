@@ -1,7 +1,7 @@
 // Game2048.jsx
 import { useState, useEffect, useCallback } from "react";
 import { decryptScore, encryptScore } from "./utils";
-import "./GameBoard.scss";
+// import "./GameBoard.scss";
 
 const GRID_SIZE = 4;
 const INITIAL_TILES = 2;
@@ -164,34 +164,67 @@ export default function Game2048() {
 	};
 
 	return (
-		<div className="game-container">
-			<div className="header">
-				<div className="title">2048</div>
-				<div className="middle">
-					<div className="score middle-box">
-						<div className="score-title">Score</div>
-						<div className="score-number">{score}</div>
+		<div className="game-container min-h-screen bg-[#faf8f0] p-5 flex flex-col items-center">
+			{/* 头部区域 */}
+			<div className="header flex justify-between w-full max-w-[600px] mb-5 items-center">
+				{/* 标题 */}
+				<div className="title text-[#726554] text-5xl font-bold font-[Frizon]">2048</div>
+
+				{/* 分数区域 */}
+				<div className="middle flex gap-4">
+					{/* 当前分数 */}
+					<div className="score middle-box bg-[#eae7d9] border-2 border-[#eae7d9] rounded-xl min-w-[75px] px-3 py-1 text-center">
+						<div className="score-title text-[#75695a] text-xs font-medium">Score</div>
+						<div className="score-number text-[#75695a] text-xl font-black">{score}</div>
 					</div>
-					<div className="best middle-box">
-						<div className="score-title">Best</div>
-						<div className="score-number">{score > bestScore ? score : bestScore}</div>
+
+					{/* 最佳分数 */}
+					<div className="best middle-box border-2 border-[#eae7d9] rounded-xl min-w-[75px] px-3 py-1 text-center">
+						<div className="score-title text-[#75695a] text-xs font-medium">Best</div>
+						<div className="score-number text-[#75695a] text-xl font-black">{score > bestScore ? score : bestScore}</div>
 					</div>
 				</div>
-				<button onClick={restart} className="restart-btn">
+
+				{/* 重启按钮 */}
+				<button
+					onClick={restart}
+					className="restart-btn bg-[#8f7a66] text-white rounded-xl px-4 py-2 text-lg font-medium
+                hover:bg-[#7c6b5a] transition-colors duration-200"
+				>
 					New Game
 				</button>
 			</div>
 
-			<div className={`grid-container ${gameOver ? "game-over" : ""}`}>
+			{/* 游戏网格区域 */}
+			<div
+				className={`grid-container bg-[#99897b] rounded-xl p-2.5 relative w-full max-w-[600px] 
+                  ${gameOver ? "game-over" : ""}`}
+			>
 				{board.map((row, i) => (
-					<div key={i} className="grid-row">
+					<div key={i} className="grid-row flex mb-2.5 last:mb-0">
 						{row.map((cell, j) => (
-							<div key={`${i}-${j}-${cell}`} className={`tile tile-${cell} ${cell ? "tile-filled" : ""}`}>
+							<div
+								key={`${i}-${j}-${cell}`}
+								className={`tile w-24 h-24 rounded-lg mr-2.5 last:mr-0 flex items-center justify-center
+                       text-4xl font-bold text-[#726554] transition-all duration-150 shadow-inner
+                       ${cell ? "bg-[#ede5db] shadow-[0_1px_3px_1px_rgba(0,0,0,0.1)]" : "bg-[#baad9a]"}
+                       tile-${cell}`}
+							>
 								{cell || ""}
 							</div>
 						))}
 					</div>
 				))}
+
+				{/* 游戏结束遮罩 */}
+				{gameOver && (
+					<div
+						className="absolute inset-0 bg-[rgba(238,228,218,0.8)] flex items-center justify-center 
+                     rounded-xl text-5xl font-bold text-[#776e65]"
+					>
+						Game Over
+					</div>
+				)}
 			</div>
 		</div>
 	);
